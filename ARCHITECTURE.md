@@ -4,6 +4,28 @@
 
 ---
 
+## Convención de nombres: idioma y casing
+
+**Idioma:** la documentación de dominio (`DOMAIN.md`, `README.md`) se queda en español. El código (carpetas de feature, tipos, variables, funciones) se escribe en **inglés**, por profesionalismo/convención de la industria. Esto es una decisión consciente, no una mezcla accidental — aplica de forma consistente a toda entidad nueva que se traduzca a código.
+
+**Glosario Dominio (ES) → Código (EN):**
+
+| DOMAIN.md (español) | Código (inglés) |
+|---|---|
+| Usuario | User |
+| Movimiento | Movement |
+| Tarjeta | Card |
+| Categoría | Category |
+| Presupuesto | Budget |
+| CompraDiferida | DeferredPurchase |
+
+**Casing:**
+- Carpetas de **feature** (paquete con `domain/`, `services/`, `hooks/`, `components/` adentro): minúsculas — `features/movement/`, `features/card/`, `features/dashboard/`. Señal visual de "esto es un módulo de feature", distinto a un componente.
+- Carpetas y archivos de **componente** (un solo componente de React): PascalCase — `components/StatisticCard/`. Obligatorio, no solo estilo: React exige que un componente empiece con mayúscula para que JSX lo distinga de una etiqueta HTML nativa.
+- Sufijo `Id` en campos de referencia (foreign keys): `Id` (minúscula la "d"), no `ID` — ej. `userId`, `categoryId`, `cardId`, `deferredPurchaseId`. Consistente con camelCase estándar de JS/TS.
+
+---
+
 ## Organización por Features
 
 Se confirma la intención ya declarada en el discovery ("la arquitectura evolucionará hacia una organización basada en Features"): cada entidad del dominio (`DOMAIN.md`) es una feature con su propia carpeta.
@@ -56,29 +78,31 @@ En Fase 1, los datos vienen de mocks a través de la capa `services/` (ver secci
 
 ## Estilos
 
-**Elección:** Sass, con alcance local por componente (CSS Modules) — se descartó Tailwind por preferencia de mayor personalización.
+**Elección (revisada):** Material UI (MUI) como librería de componentes atómicos y como motor de estilos — se descartó tanto Tailwind como Sass. Un solo sistema de estilos en todo el proyecto, para no tener dos fuentes de los mismos tokens de diseño.
 
-**Convención de organización:**
+**Decisión clave — MUI es la única fuente de verdad de los tokens:**
 
 ```
-features/tarjeta/
-  components/
-    TarjetaCard.tsx
-    TarjetaCard.module.scss   ← estilos co-ubicados, alcance local (no choca con otros componentes)
-
-styles/
-  _theme.scss                 ← variables/tema compartido (colores, espaciados, tipografía)
+src/
+  theme.ts          ← ThemeProvider de MUI: colores, tipografía, espaciados. Única fuente de verdad.
 ```
 
-**Decisión clave:** cada componente trae su propio archivo `.module.scss` junto a él (mismo criterio que `domain/`: todo lo que pertenece a un componente vive junto a él, no centralizado). El tema compartido (colores, tipografía, espaciados del Design System) vive en `styles/` a nivel de `src/`, y cada módulo de Sass lo importa cuando lo necesita — evitando que cada componente reinvente sus propios valores y perdiendo consistencia visual entre `Button`, `Card`, `Badge`, etc.
+Cualquier estilo, ya sea de un átomo de MUI o de un componente propio, se resuelve con las herramientas nativas de MUI (`sx`, `styled()`) — no con archivos `.scss` ni Tailwind. `styled()` usa el mismo motor (Emotion) que ya trae MUI por debajo, así que no se agrega un segundo sistema en paralelo.
+
+**Motivo del cambio:** se había decidido Sass Modules antes de considerar traer MUI. Al incorporar MUI para los componentes atómicos (ver sección Design System), mantener Sass en paralelo hubiera significado dos fuentes de los mismos valores de diseño (colores, espaciados) — justo el riesgo de inconsistencia que se quería evitar desde el principio.
 
 ---
 
 ## Design System
 
-**Ubicación:** `components/` a nivel raíz de `src/` (no dentro de ninguna feature) — son componentes genéricos y reutilizables (`Button`, `Input`, `Select`, `Card`, `Modal`, `Badge`, `Table`, `Dialog`, `Spinner`, `StatisticCard`) que no tienen ni deben tener conocimiento del dominio financiero.
+**Ubicación:** `components/` a nivel raíz de `src/` (no dentro de ninguna feature) — sigue siendo el lugar de la UI genérica y reutilizable, sin conocimiento del dominio financiero.
 
-**Decisión clave — componentes "tontos":** ningún componente del Design System recibe tipos del dominio (`Movimiento`, `Tarjeta`, etc.) ni calcula nada de negocio. Solo reciben props genéricas (`titulo`, `valor`, `icono`, `variant`, `children`...). Motivo: mantenerlos reutilizables fuera del contexto financiero y evitar que un cambio de regla de negocio obligue a tocar UI compartida por toda la app.
+**Decisión clave (revisada) — átomos vs. compuestos:**
+- **Átomos** (`Button`, `Input`, `Select`, `Divider`, `Spinner`, etc.): se usan directo de MUI (`@mui/material`), sin reconstruirlos desde cero. No viven como archivos propios en `components/`.
+- **Compuestos** (`StatisticCard`, `Badge` con reglas propias, y cualquier combinación específica de este proyecto): sí se construyen a mano en `components/`, por dentro usando átomos de MUI (`Card`, `Typography`, etc.) combinados a la medida.
+- Si en el futuro se necesita reemplazar algún átomo de MUI por uno propio (Design System 100% custom), el usuario lo señala explícitamente — no es el plan por ahora.
+
+**Decisión clave — componentes "tontos" (se mantiene):** ni los átomos de MUI ni los compuestos propios reciben tipos del dominio (`Movimiento`, `Tarjeta`, etc.) ni calculan nada de negocio. Solo reciben props genéricas (`titulo`, `valor`, `icono`, `variant`, `children`...). Motivo: mantenerlos reutilizables fuera del contexto financiero y evitar que un cambio de regla de negocio obligue a tocar UI compartida por toda la app.
 
 **Composición con features:** el cálculo y la lógica de negocio que alimentan a un componente del Design System viven en la feature correspondiente, no en el Design System mismo.
 

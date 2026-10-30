@@ -375,7 +375,7 @@ Componentes iniciales:
 - React Hook Form
 - Zod
 - Zustand
-- Sass (CSS Modules)
+- Material UI (MUI) — componentes atómicos y sistema de tema/estilos
 
 ---
 
