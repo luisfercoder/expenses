@@ -8,7 +8,7 @@ import { ExpensesByCategorySection } from "./ExpensesByCategorySection"
 
 
 export const Dashboard = () => {
-    const { loading, balance } = useMovement()
+    const { loading, balance , totalExpenses, totalIncome,} = useMovement()
     if (loading) {
         return <Typography>Cargando...</Typography>
     }
@@ -21,7 +21,7 @@ export const Dashboard = () => {
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatisticCard
                         label="Balance del mes"
-                        value={`${balance}`}
+                        value={`$${balance}`}
                         icon="account_balance"
                         color="primary"
                     />
@@ -31,7 +31,7 @@ export const Dashboard = () => {
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatisticCard
                         label="Ingresos"
-                        value="$0"
+                        value={`$${totalIncome}`}
                         icon="trending_up"
                         color="success"
                     />
@@ -41,7 +41,7 @@ export const Dashboard = () => {
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatisticCard
                         label="Gastos"
-                        value="$0"
+                        value={`$${totalExpenses}`}
                         icon="trending_down"
                         color="warning"
                     />
