@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react"
-import type { Card } from "../card.types"
+import { useEffect } from "react"
 import { getCards } from "../services/getCards"
 import { calculateUsedBalance } from "../domain/calculateUsedBalance"
+import { useCardStore } from "../../../stores/cardStore"
 
 export const useCards = () => {
-    const [cards, setCards] = useState<Card[]>([])
-    const [loading, setLoading] = useState(true)
-    const [totalUsedBalance, setTotalUsedBalance] = useState(0)
+    const cards = useCardStore((store) => store.cards)
+    const loading = useCardStore((store) => store.loading)
+    const setCards = useCardStore((store) => store.setCards)
+    const setLoading = useCardStore((store) => store.setLoading)
+    const totalUsedBalance = calculateUsedBalance(cards)
 
     useEffect(() => {
         const loadCards = async () => {
             try {
+                setLoading(true)
                 // const response = await fetch('/api/cards')
                 const data = await getCards()
                 setCards(data)
-                const calculated = calculateUsedBalance(data)
-                setTotalUsedBalance(calculated)
             } catch (error) {
                 console.error('Error loading cards:', error)
             }

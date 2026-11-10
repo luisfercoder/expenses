@@ -8,7 +8,7 @@ import { ExpensesByCategorySection } from "./ExpensesByCategorySection"
 
 
 export const Dashboard = () => {
-    const { loading, balance , totalExpenses, totalIncome,} = useMovement()
+    const { loading, balance , totalExpenses, totalIncome,saving} = useMovement()
     if (loading) {
         return <Typography>Cargando...</Typography>
     }
@@ -51,7 +51,7 @@ export const Dashboard = () => {
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatisticCard
                         label="Ahorro"
-                        value="$0"
+                        value={`$${saving}`}
                         icon="savings"
                         color="info"
                     />

@@ -1,20 +1,22 @@
-import { useState, useEffect } from "react"
-import type { DeferredPurchase } from "../deferredPurchase.types"
+import { useEffect } from "react"
 import { getDeferredPurchases } from "../services/getDeferredPurchases"
 import { calculatePendingPayments } from "../domain/calculatePendingPayments"
+import { useDeferredPurchaseStore } from "../../../stores/deferredPurchaseStore"
 
 export const useGetDeferredPurchases = () => {
-    const [purchases, setPurchases] = useState<DeferredPurchase[]>([])
-    const [loading, setLoading] = useState(true)
-    const [pendingPayments, setPendingPayments] = useState<any[]>([])
+    const purchases = useDeferredPurchaseStore((store) => store.purchases)
+    const loading = useDeferredPurchaseStore((store) => store.loading)
+    const setPurchases = useDeferredPurchaseStore((store) => store.setPurchases)
+    const setLoading = useDeferredPurchaseStore((store) => store.setLoading)
+    const pendingPayments = calculatePendingPayments(purchases)
 
     useEffect(() => {
         const loadPurchases = async () => {
             try {
+                setLoading(true)
                 const data = await getDeferredPurchases()
                 setPurchases(data)
-                const calculated = calculatePendingPayments(data)
-                setPendingPayments(calculated)
+
             } catch (error) {
                 console.error('Error getting deferred purchases:', error)
             } finally {
