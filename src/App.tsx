@@ -1,13 +1,14 @@
 
 import './App.css'
-import { Dashboard } from './features/dashboard/components/Dashboard'
+import { DesignSystemShowcase } from './components/DesignSystemShowcase'
 
 function App() {
 
 
+
   return (
     <>
-      <Dashboard />
+      <DesignSystemShowcase />
     </>
   )
 }
