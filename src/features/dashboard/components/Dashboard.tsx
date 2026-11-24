@@ -1,20 +1,43 @@
-import { Grid, Typography, Container } from "@mui/material"
+import { Grid, Typography, Container, Stack } from "@mui/material"
 import { StatisticCard } from "../../../components/StatisticCard/StatisticCard"
 import { useMovement } from "../../movement/hooks/useMovements"
 
 import { CardsSection } from "./CardsSection"
 import { PendingPaymentSection } from "./PendingPaymentSection"
 import { ExpensesByCategorySection } from "./ExpensesByCategorySection"
+import { lazy, Suspense, useState } from "react"
+import { Button } from "../../../components/Button/Button"
+import { Modal } from "../../../components/Modal/Modal"
+
+const MovementFormLazy = lazy(() => import("../../movement/components/MovementForm").then(module => ({ default: module.MovementForm })))
 
 
 export const Dashboard = () => {
-    const { loading, balance , totalExpenses, totalIncome,saving} = useMovement()
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
+    const { loading, balance, totalExpenses, totalIncome, saving } = useMovement()
+
+    const handleModalClose = () => {
+        setIsModalOpen(false)
+    }
+
+    const handleMovementSaved = () => {
+        setIsModalOpen(false)
+    }
+
     if (loading) {
         return <Typography>Cargando...</Typography>
     }
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
-            <Typography variant="h4" gutterBottom>Dashboard</Typography>
+            <Stack direction="row" sx={{ mb: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h4">Dashboard</Typography>
+                <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                    Agregar Movimiento
+                </Button>
+            </Stack>
+            {/* <Typography variant="h4" gutterBottom>Dashboard</Typography> */}
 
             <Grid container spacing={3}>
                 {/* Placeholder para Balance */}
@@ -60,6 +83,19 @@ export const Dashboard = () => {
             <CardsSection />
             <PendingPaymentSection />
             <ExpensesByCategorySection />
+            <Modal
+                open={isModalOpen}
+                onClose={handleModalClose}
+                title="Agregar Movimiento"
+                actions={null} // Acciones están dentro del formulario
+            >
+                <Suspense fallback={<Typography>Cargando...</Typography>}>
+                    <MovementFormLazy
+                        onSuccess={handleMovementSaved}
+                        onCancel={handleModalClose}
+                    />
+                </Suspense>
+            </Modal>
         </Container>
     )
 }

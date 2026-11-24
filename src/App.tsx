@@ -1,6 +1,6 @@
 
 import './App.css'
-import { DesignSystemShowcase } from './components/DesignSystemShowcase'
+import { Dashboard } from './features/dashboard/components/Dashboard'
 
 function App() {
 
@@ -8,7 +8,7 @@ function App() {
 
   return (
     <>
-      <DesignSystemShowcase />
+      <Dashboard />
     </>
   )
 }
